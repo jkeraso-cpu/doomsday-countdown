@@ -102,9 +102,13 @@ export function getTimeLeft(target = new Date(RELEASE_DATE_ISO).getTime()): Time
   };
 }
 
+const ZERO: TimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0, arrived: false };
+
 export function useCountdown() {
-  const [time, setTime] = useState<TimeLeft>(() => getTimeLeft());
+  // Start at zero so server and client markup match, then tick on mount.
+  const [time, setTime] = useState<TimeLeft>(ZERO);
   useEffect(() => {
+    setTime(getTimeLeft());
     const id = window.setInterval(() => setTime(getTimeLeft()), 1000);
     return () => window.clearInterval(id);
   }, []);
