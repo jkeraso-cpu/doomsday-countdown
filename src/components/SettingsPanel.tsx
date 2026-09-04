@@ -1,6 +1,7 @@
 import { useRef } from "react";
-import { STORAGE, type BackgroundMode, type Settings } from "@/config";
-import type { Progress } from "@/lib/doomsday-store";
+import { X } from "lucide-react";
+import { SLIDESHOW_INTERVALS, STORAGE, type BackgroundMode, type Settings } from "@/config";
+import type { CustomBackground, Progress } from "@/lib/doomsday-store";
 import { MusicPlayer } from "./MusicPlayer";
 
 interface Props {
@@ -11,7 +12,12 @@ interface Props {
   reset: () => void;
   activated: boolean;
   onReplayIntro: () => void;
+  backgrounds: CustomBackground[];
+  addBackgrounds: (files: File[]) => void;
+  removeBackground: (src: string) => void;
+  clearBackgrounds: () => void;
 }
+
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
