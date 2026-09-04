@@ -77,8 +77,8 @@ export function MediaBackground({ mode, effects, reducedMotion }: Props) {
       })}
 
       {/* Overlays: darkening, vignette, scanlines, grain */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/75 to-background" />
-      <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_25%,oklch(0.04_0_0/0.75)_85%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background/95" />
+      <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_30%,oklch(0.04_0_0/0.7)_88%)]" />
       {effects && <div className="scanlines pointer-events-none absolute inset-0 opacity-40" />}
       {effects && <div className="grain pointer-events-none absolute inset-0" />}
 
