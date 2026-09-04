@@ -81,6 +81,68 @@ export function useSettings() {
   return { settings, update };
 }
 
+/** User-uploaded background images (data URLs), persisted locally. */
+export interface CustomBackground {
+  src: string;
+  title: string;
+}
+
+function readArray(key: string): CustomBackground[] {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as CustomBackground[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function useCustomBackgrounds() {
+  const [images, setImages] = useState<CustomBackground[]>([]);
+
+  useEffect(() => {
+    setImages(readArray(STORAGE.backgrounds));
+  }, []);
+
+  const persist = useCallback((next: CustomBackground[]) => {
+    setImages(next);
+    writeJSON(STORAGE.backgrounds, next);
+  }, []);
+
+  const add = useCallback(
+    async (files: File[]) => {
+      const loaded = await Promise.all(
+        files
+          .filter((f) => f.type.startsWith("image/"))
+          .map(
+            (f) =>
+              new Promise<CustomBackground | null>((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () =>
+                  resolve({ src: String(reader.result), title: f.name.toUpperCase() });
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(f);
+              }),
+          ),
+      );
+      const next = [...images, ...loaded.filter((i): i is CustomBackground => Boolean(i))];
+      persist(next);
+    },
+    [images, persist],
+  );
+
+  const remove = useCallback(
+    (src: string) => persist(images.filter((i) => i.src !== src)),
+    [images, persist],
+  );
+
+  const clear = useCallback(() => persist([]), [persist]);
+
+  return { images, add, remove, clear };
+}
+
+
 export interface TimeLeft {
   days: number;
   hours: number;

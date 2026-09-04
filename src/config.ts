@@ -26,6 +26,7 @@ export const STORAGE = {
   progress: "doomsday-progress",
   settings: "doomsday-settings",
   intro: "doomsday-intro-seen",
+  backgrounds: "doomsday-backgrounds",
 } as const;
 
 export type BackgroundMode = "auto" | "images" | "video";
@@ -38,6 +39,10 @@ export interface Settings {
   loop: boolean;
   effects: boolean;
   showIntro: boolean;
+  /** Background slideshow rotation on/off */
+  slideshow: boolean;
+  /** Rotation interval in seconds (5 | 10 | 30 | 60) */
+  slideshowInterval: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -48,7 +53,13 @@ export const DEFAULT_SETTINGS: Settings = {
   loop: true,
   effects: true,
   showIntro: true,
+  slideshow: true,
+  slideshowInterval: 10,
 };
+
+/** Available slideshow intervals (seconds) */
+export const SLIDESHOW_INTERVALS = [5, 10, 30, 60] as const;
 
 /** Media rotation interval (ms) for image backgrounds */
 export const IMAGE_INTERVAL = 8000;
+
