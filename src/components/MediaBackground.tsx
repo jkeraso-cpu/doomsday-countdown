@@ -1,16 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { IMAGE_INTERVAL, type BackgroundMode } from "@/config";
-import { media } from "@/data/media";
+import { media, type MediaItem } from "@/data/media";
 
 interface Props {
   mode: BackgroundMode;
   effects: boolean;
   reducedMotion: boolean;
+  /** User-uploaded background images; when present they replace the bundled art. */
+  customImages?: { src: string; title: string }[];
+  /** Rotate between images automatically. */
+  slideshow?: boolean;
+  /** Rotation interval in seconds. */
+  intervalSeconds?: number;
 }
 
-export function MediaBackground({ mode, effects, reducedMotion }: Props) {
-  const items = useMemo(() => {
+export function MediaBackground({
+  mode,
+  effects,
+  reducedMotion,
+  customImages = [],
+  slideshow = true,
+  intervalSeconds,
+}: Props) {
+  const items = useMemo<MediaItem[]>(() => {
+    if (customImages.length) {
+      return customImages.map((i) => ({ type: "image" as const, src: i.src, title: i.title }));
+    }
     const filtered =
       mode === "images"
         ? media.filter((m) => m.type === "image")
@@ -18,7 +34,7 @@ export function MediaBackground({ mode, effects, reducedMotion }: Props) {
           ? media.filter((m) => m.type === "video")
           : media;
     return filtered.length ? filtered : media;
-  }, [mode]);
+  }, [mode, customImages]);
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -26,19 +42,19 @@ export function MediaBackground({ mode, effects, reducedMotion }: Props) {
 
   useEffect(() => setIndex(0), [items]);
 
+  const intervalMs = intervalSeconds ? intervalSeconds * 1000 : IMAGE_INTERVAL;
+
   useEffect(() => {
-    if (paused || items.length < 2) return;
+    if (paused || !slideshow || items.length < 2) return;
     const current = items[index];
     if (current?.type === "video") return;
-    const id = window.setInterval(
-      () => setIndex((i) => (i + 1) % items.length),
-      IMAGE_INTERVAL,
-    );
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % items.length), intervalMs);
     return () => window.clearInterval(id);
-  }, [paused, items, index]);
+  }, [paused, slideshow, intervalMs, items, index]);
 
   const current = items[index];
   const animate = effects && !reducedMotion;
+
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-background" aria-hidden="true">
