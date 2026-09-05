@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { X } from "lucide-react";
 import { SLIDESHOW_INTERVALS, STORAGE, type BackgroundMode, type Settings } from "@/config";
-import type { CustomBackground, Progress } from "@/lib/doomsday-store";
+import type { Progress } from "@/lib/doomsday-store";
+import { media } from "@/data/media";
 import { MusicPlayer } from "./MusicPlayer";
 
 interface Props {
@@ -12,11 +12,8 @@ interface Props {
   reset: () => void;
   activated: boolean;
   onReplayIntro: () => void;
-  backgrounds: CustomBackground[];
-  addBackgrounds: (files: File[]) => void;
-  removeBackground: (src: string) => void;
-  clearBackgrounds: () => void;
 }
+
 
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -66,13 +63,9 @@ export function SettingsPanel({
   reset,
   activated,
   onReplayIntro,
-  backgrounds,
-  addBackgrounds,
-  removeBackground,
-  clearBackgrounds,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const imageRef = useRef<HTMLInputElement>(null);
+
 
 
   const exportProgress = () => {
@@ -138,64 +131,35 @@ export function SettingsPanel({
             />
           </Row>
           <Row label="Slideshow images">
-            <button
-              type="button"
-              onClick={() => imageRef.current?.click()}
-              className="border border-border px-3 py-1.5 font-mono text-[0.6rem] tracking-[0.18em] transition-colors hover:border-primary/60"
-            >
-              UPLOAD
-            </button>
-            <input
-              ref={imageRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                addBackgrounds(Array.from(e.target.files ?? []));
-                e.target.value = "";
-              }}
-            />
-            <button
-              type="button"
-              disabled={!backgrounds.length}
-              onClick={clearBackgrounds}
-              className="border border-border/60 px-3 py-1.5 font-mono text-[0.6rem] tracking-[0.18em] text-muted-foreground/70 transition-colors hover:border-destructive/60 hover:text-destructive disabled:opacity-40"
-            >
-              CLEAR
-            </button>
             <span className="label-hud text-[0.55rem] text-muted-foreground/60">
-              {backgrounds.length ? `${backgrounds.length} CUSTOM` : "DEFAULT ART"}
+              {media.length} BUILT-IN FRAMES
             </span>
           </Row>
-          {backgrounds.length > 0 && (
-            <div className="flex flex-wrap gap-2 pb-4">
-              {backgrounds.map((b) => (
-                <div key={b.src} className="relative h-14 w-20 border border-border/70">
-                  <img src={b.src} alt={b.title} className="h-full w-full object-cover" />
-                  <button
-                    type="button"
-                    aria-label={`Remove ${b.title}`}
-                    onClick={() => removeBackground(b.src)}
-                    className="absolute -right-1 -top-1 border border-border bg-background/90 p-0.5 text-muted-foreground transition-colors hover:text-destructive"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
           <Row label="Music">
             <Toggle
               value={settings.musicEnabled ? "on" : "off"}
               onChange={(v) => update({ musicEnabled: v === "on" })}
-
               options={[
                 { label: "ENABLE", value: "on" },
                 { label: "DISABLE", value: "off" },
               ]}
             />
           </Row>
+          <Row label="Volume">
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(settings.volume * 100)}
+              onChange={(e) => update({ volume: Number(e.target.value) / 100, muted: false })}
+              aria-label="Soundtrack volume"
+              className="h-1 w-40 cursor-pointer appearance-none bg-border accent-[oklch(0.52_0.21_25)]"
+            />
+            <span className="label-hud text-[0.55rem] text-muted-foreground/60">
+              {settings.muted ? "MUTED" : `${Math.round(settings.volume * 100)}%`}
+            </span>
+          </Row>
+
           <Row label="Cinematic effects">
             <Toggle
               value={settings.effects ? "on" : "off"}
