@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { X } from "lucide-react";
 import { SLIDESHOW_INTERVALS, STORAGE, type BackgroundMode, type Settings } from "@/config";
-import type { CustomBackground, Progress } from "@/lib/doomsday-store";
+import type { Progress } from "@/lib/doomsday-store";
+import { media } from "@/data/media";
 import { MusicPlayer } from "./MusicPlayer";
 
 interface Props {
@@ -12,11 +12,8 @@ interface Props {
   reset: () => void;
   activated: boolean;
   onReplayIntro: () => void;
-  backgrounds: CustomBackground[];
-  addBackgrounds: (files: File[]) => void;
-  removeBackground: (src: string) => void;
-  clearBackgrounds: () => void;
 }
+
 
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
@@ -66,13 +63,9 @@ export function SettingsPanel({
   reset,
   activated,
   onReplayIntro,
-  backgrounds,
-  addBackgrounds,
-  removeBackground,
-  clearBackgrounds,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const imageRef = useRef<HTMLInputElement>(null);
+
 
 
   const exportProgress = () => {
