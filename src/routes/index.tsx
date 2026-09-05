@@ -97,10 +97,10 @@ function MissionControl() {
         mode={media.length ? settings.background : "auto"}
         effects={settings.effects}
         reducedMotion={reducedMotion}
-        customImages={backgrounds}
         slideshow={settings.slideshow}
         intervalSeconds={settings.slideshowInterval}
       />
+
 
 
       {introVisible && <IntroScreen onEnter={enter} />}
@@ -129,11 +129,8 @@ function MissionControl() {
             reset={reset}
             activated={activated}
             onReplayIntro={replayIntro}
-            backgrounds={backgrounds}
-            addBackgrounds={addBackgrounds}
-            removeBackground={removeBackground}
-            clearBackgrounds={clearBackgrounds}
           />
+
 
         </main>
         <Footer />
