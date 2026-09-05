@@ -10,11 +10,10 @@ interface Props {
 
 export function MusicPlayer({ settings, update, activated }: Props) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [localSrc, setLocalSrc] = useState<string | null>(null);
-  const [localName, setLocalName] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
-  const src = localSrc ?? SOUNDTRACK_SRC;
+  const src = SOUNDTRACK_SRC;
   const hasTrack = Boolean(src);
 
   useEffect(() => {
@@ -29,10 +28,19 @@ export function MusicPlayer({ settings, update, activated }: Props) {
     const el = audioRef.current;
     if (!el || !hasTrack) return;
     if (activated && settings.musicEnabled) {
-      el.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      el.play()
+        .then(() => {
+          setPlaying(true);
+          setBlocked(false);
+        })
+        .catch(() => {
+          setPlaying(false);
+          setBlocked(true);
+        });
     } else {
       el.pause();
       setPlaying(false);
+      setBlocked(false);
     }
   }, [activated, settings.musicEnabled, hasTrack, src]);
 
@@ -43,15 +51,18 @@ export function MusicPlayer({ settings, update, activated }: Props) {
       el.pause();
       setPlaying(false);
     } else {
-      el.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      el.play()
+        .then(() => {
+          setPlaying(true);
+          setBlocked(false);
+        })
+        .catch(() => {
+          setPlaying(false);
+          setBlocked(true);
+        });
     }
   };
 
-  const onFile = (file?: File) => {
-    if (!file) return;
-    setLocalSrc(URL.createObjectURL(file));
-    setLocalName(file.name);
-  };
 
   return (
     <div className="panel corner-brackets relative p-5 sm:p-6">
