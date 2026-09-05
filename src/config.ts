@@ -13,13 +13,15 @@ export const RELEASE_LABEL = "DECEMBER 18, 2026";
 export const RELEASE_SHORT = "18.12.2026";
 
 /**
- * ASSET SLOT — SOUNDTRACK
- * Put your own legally-obtained audio file in `public/audio/` and point to it,
- * e.g. "/audio/theme.mp3". Leave empty to show "SOUNDTRACK OFFLINE".
- * You can also load a local file at runtime from the music player.
+ * BUILT-IN SOUNDTRACK
+ * Ships with the deployed app (served from the Lovable asset CDN), so every
+ * visitor gets the same track with no upload required. Swap the pointer file
+ * to change it.
  */
-export const SOUNDTRACK_SRC = "";
-export const SOUNDTRACK_TITLE = "USER-PROVIDED TRACK";
+import soundtrack from "@/assets/the_avengers_-_alan_silvestri.mp3.asset.json";
+
+export const SOUNDTRACK_SRC = soundtrack.url;
+export const SOUNDTRACK_TITLE = "THE AVENGERS — ALAN SILVESTRI";
 
 /** Storage keys */
 export const STORAGE = {
