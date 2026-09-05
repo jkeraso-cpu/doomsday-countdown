@@ -2,7 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { STORAGE } from "@/config";
 import { media } from "@/data/media";
-import { useProgress, useReducedMotion, useSettings } from "@/lib/doomsday-store";
+import {
+  useCustomBackgrounds,
+  useProgress,
+  useReducedMotion,
+  useSettings,
+} from "@/lib/doomsday-store";
+
 import { IntroScreen } from "@/components/IntroScreen";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -84,7 +90,11 @@ function MissionControl() {
         mode={media.length ? settings.background : "auto"}
         effects={settings.effects}
         reducedMotion={reducedMotion}
+        customImages={backgrounds}
+        slideshow={settings.slideshow}
+        intervalSeconds={settings.slideshowInterval}
       />
+
 
       {introVisible && <IntroScreen onEnter={enter} />}
 
@@ -112,7 +122,12 @@ function MissionControl() {
             reset={reset}
             activated={activated}
             onReplayIntro={replayIntro}
+            backgrounds={backgrounds}
+            addBackgrounds={addBackgrounds}
+            removeBackground={removeBackground}
+            clearBackgrounds={clearBackgrounds}
           />
+
         </main>
         <Footer />
       </div>
