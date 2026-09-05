@@ -2,12 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { STORAGE } from "@/config";
 import { media } from "@/data/media";
-import {
-  useCustomBackgrounds,
-  useProgress,
-  useReducedMotion,
-  useSettings,
-} from "@/lib/doomsday-store";
+import { useProgress, useReducedMotion, useSettings } from "@/lib/doomsday-store";
+
 
 import { IntroScreen } from "@/components/IntroScreen";
 import { Navbar } from "@/components/Navbar";
@@ -46,12 +42,7 @@ function MissionControl() {
   const { settings, update } = useSettings();
   const { progress, toggle, reset, persist, total, completedCount, percent } = useProgress();
   const reducedMotion = useReducedMotion();
-  const {
-    images: backgrounds,
-    add: addBackgrounds,
-    remove: removeBackground,
-    clear: clearBackgrounds,
-  } = useCustomBackgrounds();
+
 
 
   const [ready, setReady] = useState(false);
