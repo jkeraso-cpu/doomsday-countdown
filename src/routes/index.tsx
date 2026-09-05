@@ -46,6 +46,13 @@ function MissionControl() {
   const { settings, update } = useSettings();
   const { progress, toggle, reset, persist, total, completedCount, percent } = useProgress();
   const reducedMotion = useReducedMotion();
+  const {
+    images: backgrounds,
+    add: addBackgrounds,
+    remove: removeBackground,
+    clear: clearBackgrounds,
+  } = useCustomBackgrounds();
+
 
   const [ready, setReady] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
