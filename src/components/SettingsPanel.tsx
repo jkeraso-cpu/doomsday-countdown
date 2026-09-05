@@ -66,8 +66,14 @@ export function SettingsPanel({
   reset,
   activated,
   onReplayIntro,
+  backgrounds,
+  addBackgrounds,
+  removeBackground,
+  clearBackgrounds,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const imageRef = useRef<HTMLInputElement>(null);
+
 
   const exportProgress = () => {
     const blob = new Blob([JSON.stringify(progress, null, 2)], { type: "application/json" });
