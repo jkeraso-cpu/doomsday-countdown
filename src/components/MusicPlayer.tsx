@@ -74,11 +74,12 @@ export function MusicPlayer({ settings, update, activated }: Props) {
       {hasTrack ? (
         <>
           <p className="mt-4 font-mono text-xs tracking-[0.18em] text-primary">
-            NOW PLAYING {playing ? "" : "(PAUSED)"}
+            {playing ? "NOW PLAYING" : blocked ? "TAP PLAY TO START AUDIO" : "PAUSED"}
           </p>
           <p className="mt-1.5 truncate font-display text-sm tracking-[0.08em]">
-            {localName ?? SOUNDTRACK_TITLE}
+            {SOUNDTRACK_TITLE}
           </p>
+
 
           <audio ref={audioRef} src={src} preload="metadata" />
 
@@ -124,28 +125,11 @@ export function MusicPlayer({ settings, update, activated }: Props) {
           </div>
         </>
       ) : (
-        <>
-          <p className="mt-4 font-mono text-xs tracking-[0.2em] text-muted-foreground">
-            SOUNDTRACK OFFLINE
-          </p>
-          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            No audio configured. Load a local audio file you own below, or drop one into
-            <span className="font-mono text-silver"> public/audio/ </span>
-            and set <span className="font-mono text-silver">SOUNDTRACK_SRC</span> in
-            <span className="font-mono text-silver"> src/config.ts</span>.
-          </p>
-        </>
+        <p className="mt-4 font-mono text-xs tracking-[0.2em] text-muted-foreground">
+          SOUNDTRACK OFFLINE
+        </p>
       )}
-
-      <label className="mt-5 block">
-        <span className="label-hud text-[0.55rem]">Load local audio file</span>
-        <input
-          type="file"
-          accept="audio/*"
-          onChange={(e) => onFile(e.target.files?.[0])}
-          className="mt-2 block w-full cursor-pointer border border-border bg-transparent p-2 font-mono text-[0.65rem] text-muted-foreground file:mr-3 file:border-0 file:bg-primary/20 file:px-3 file:py-1.5 file:font-mono file:text-[0.6rem] file:tracking-[0.2em] file:text-foreground"
-        />
-      </label>
     </div>
+
   );
 }
