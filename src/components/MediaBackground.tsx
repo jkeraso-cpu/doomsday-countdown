@@ -7,8 +7,6 @@ interface Props {
   mode: BackgroundMode;
   effects: boolean;
   reducedMotion: boolean;
-  /** User-uploaded background images; when present they replace the bundled art. */
-  customImages?: { src: string; title: string }[];
   /** Rotate between images automatically. */
   slideshow?: boolean;
   /** Rotation interval in seconds. */
@@ -19,14 +17,10 @@ export function MediaBackground({
   mode,
   effects,
   reducedMotion,
-  customImages = [],
   slideshow = true,
   intervalSeconds,
 }: Props) {
   const items = useMemo<MediaItem[]>(() => {
-    if (customImages.length) {
-      return customImages.map((i) => ({ type: "image" as const, src: i.src, title: i.title }));
-    }
     const filtered =
       mode === "images"
         ? media.filter((m) => m.type === "image")
@@ -34,7 +28,7 @@ export function MediaBackground({
           ? media.filter((m) => m.type === "video")
           : media;
     return filtered.length ? filtered : media;
-  }, [mode, customImages]);
+  }, [mode]);
 
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -55,7 +49,6 @@ export function MediaBackground({
   const current = items[index];
   const animate = effects && !reducedMotion;
 
-
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden bg-background" aria-hidden="true">
       {items.map((item, i) => {
@@ -70,7 +63,7 @@ export function MediaBackground({
             {item.type === "video" ? (
               active ? (
                 <video
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                   src={item.src}
                   autoPlay
                   muted
@@ -80,13 +73,25 @@ export function MediaBackground({
                 />
               ) : null
             ) : (
-              <img
-                src={item.src}
-                alt=""
-                loading={i === 0 ? "eager" : "lazy"}
-                className={`h-full w-full object-cover ${animate && active ? "anim-drift" : "scale-105"}`}
-                onError={() => setFailed((f) => ({ ...f, [item.src]: true }))}
-              />
+              <>
+                {/* Backdrop fill: blurred, dimmed copy so letterbox areas never
+                    show empty bars and the original image is never cropped. */}
+                <div
+                  className={`absolute inset-0 scale-110 bg-cover bg-center blur-2xl brightness-[0.45] ${
+                    animate && active ? "anim-drift-soft" : ""
+                  }`}
+                  style={{ backgroundImage: `url(${item.src})` }}
+                />
+                {/* The actual frame — full composition, original aspect ratio. */}
+                <img
+                  src={item.src}
+                  alt=""
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  className="absolute inset-0 h-full w-full object-contain object-center"
+                  onError={() => setFailed((f) => ({ ...f, [item.src]: true }))}
+                />
+              </>
             )}
           </div>
         );
