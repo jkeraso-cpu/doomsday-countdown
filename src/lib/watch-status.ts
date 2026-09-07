@@ -83,7 +83,7 @@ export function useWatchStatus() {
     (id: number) => {
       const current = statuses[key(id)] ?? "not-started";
       const idx = STATUS_ORDER.indexOf(current);
-      setStatus(id, STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]);
+      setStatus(id, STATUS_ORDER[(idx + 1) % STATUS_ORDER.length]!);
     },
     [statuses, setStatus],
   );
