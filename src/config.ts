@@ -29,6 +29,7 @@ export const STORAGE = {
   settings: "doomsday-settings",
   intro: "doomsday-intro-seen",
   backgrounds: "doomsday-backgrounds",
+  status: "doomsday-status",
 } as const;
 
 export type BackgroundMode = "auto" | "images" | "video";
