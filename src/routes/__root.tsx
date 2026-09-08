@@ -10,6 +10,11 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { DoomsdayProvider, useDoomsday } from "../lib/app-state";
+import { MediaBackground } from "../components/MediaBackground";
+import { AmbientAudio } from "../components/AmbientAudio";
+import { Navbar } from "../components/Navbar";
+import { useRouterState } from "@tanstack/react-router";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -130,8 +135,32 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <DoomsdayProvider>
+        <Shell />
+      </DoomsdayProvider>
+    </QueryClientProvider>
+  );
+}
+
+/** Persistent chrome: background slideshow, ambience and navigation. */
+function Shell() {
+  const { settings, reducedMotion } = useDoomsday();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isEntry = pathname === "/";
+
+  return (
+    <>
+      <MediaBackground
+        mode={settings.background}
+        effects={settings.effects}
+        reducedMotion={reducedMotion}
+        slideshow={settings.slideshow}
+        intervalSeconds={settings.slideshowInterval}
+      />
+      <AmbientAudio />
+      {!isEntry && <Navbar />}
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-    </QueryClientProvider>
+    </>
   );
 }
