@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as WatchRouteImport } from './routes/watch'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const ProgressRoute = ProgressRouteImport.update({
   path: '/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchRoute = WatchRouteImport.update({
   id: '/watch',
   path: '/watch',
@@ -32,30 +38,34 @@ const WatchRoute = WatchRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/progress': typeof ProgressRoute
+  '/settings': typeof SettingsRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/progress' | '/watch'
+  fullPaths: '/' | '/progress' | '/settings' | '/watch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/progress' | '/watch'
-  id: '__root__' | '/' | '/progress' | '/watch'
+  to: '/' | '/progress' | '/settings' | '/watch'
+  id: '__root__' | '/' | '/progress' | '/settings' | '/watch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProgressRoute: typeof ProgressRoute
+  SettingsRoute: typeof SettingsRoute
   WatchRoute: typeof WatchRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watch': {
       id: '/watch'
       path: '/watch'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProgressRoute: ProgressRoute,
+  SettingsRoute: SettingsRoute,
   WatchRoute: WatchRoute,
 }
 export const routeTree = rootRouteImport
