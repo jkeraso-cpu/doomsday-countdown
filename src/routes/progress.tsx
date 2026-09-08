@@ -25,7 +25,7 @@ export const Route = createFileRoute("/progress")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: ProgressPage;
+  component: ProgressPage,
 });
 
 const FILTERS = ["ALL", "NOT STARTED", "IN PROGRESS", "COMPLETED"] as const;
