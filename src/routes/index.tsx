@@ -1,131 +1,95 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { STORAGE } from "@/config";
-import { media } from "@/data/media";
-import { useProgress, useReducedMotion, useSettings } from "@/lib/doomsday-store";
-
-
-import { IntroScreen } from "@/components/IntroScreen";
-import { Navbar } from "@/components/Navbar";
-import { Hero } from "@/components/Hero";
-import { Countdown } from "@/components/Countdown";
-import { StatsPanel } from "@/components/StatsPanel";
-import { Watchlist } from "@/components/Watchlist";
-import { StatusPanel } from "@/components/StatusPanel";
-import { SettingsPanel } from "@/components/SettingsPanel";
-import { MediaBackground } from "@/components/MediaBackground";
-import { Footer } from "@/components/Footer";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { RELEASE_LABEL } from "@/config";
+import { useDoomsday } from "@/lib/app-state";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Avengers: Doomsday // Mission Control — Countdown Dashboard" },
+      { title: "Doomsday Watch — Classified Countdown Terminal" },
       {
         name: "description",
         content:
-          "A cinematic fan dashboard: live countdown to December 18, 2026, Marvel prep watchlist, progress tracking and soundtrack controls.",
+          "Enter the Doomsday Watch: a cinematic fan terminal counting down to Avengers: Doomsday on December 18, 2026.",
       },
-      { property: "og:title", content: "Avengers: Doomsday // Mission Control" },
+      { property: "og:title", content: "Doomsday Watch — Classified Countdown Terminal" },
       {
         property: "og:description",
-        content:
-          "Live countdown to December 18, 2026 with a Marvel prep watchlist and progress tracker.",
+        content: "A cinematic fan terminal counting down to Avengers: Doomsday.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: MissionControl,
+  component: HomeEntry,
 });
 
-function MissionControl() {
-  const { settings, update } = useSettings();
-  const { progress, toggle, reset, persist, total, completedCount, percent } = useProgress();
-  const reducedMotion = useReducedMotion();
-
-
-
-  const [ready, setReady] = useState(false);
-  const [showIntro, setShowIntro] = useState(false);
-  const [activated, setActivated] = useState(false);
-
-  useEffect(() => {
-    let seen = false;
-    try {
-      seen = localStorage.getItem(STORAGE.intro) === "true";
-    } catch {
-      seen = false;
-    }
-    setShowIntro(!seen);
-    setActivated(seen);
-    setReady(true);
-  }, []);
+function HomeEntry() {
+  const navigate = useNavigate();
+  const { activate, reducedMotion, settings } = useDoomsday();
+  const [entering, setEntering] = useState(false);
 
   const enter = () => {
-    try {
-      localStorage.setItem(STORAGE.intro, "true");
-    } catch {
-      /* ignore */
+    activate();
+    if (reducedMotion || !settings.effects) {
+      navigate({ to: "/watch" });
+      return;
     }
-    setShowIntro(false);
-    setActivated(true);
+    setEntering(true);
+    window.setTimeout(() => navigate({ to: "/watch" }), 1050);
   };
-
-  const replayIntro = () => {
-    try {
-      localStorage.removeItem(STORAGE.intro);
-    } catch {
-      /* ignore */
-    }
-    setShowIntro(true);
-  };
-
-  const introVisible = ready && showIntro && (settings.showIntro || !activated);
 
   return (
-    <>
-      <MediaBackground
-        mode={media.length ? settings.background : "auto"}
-        effects={settings.effects}
-        reducedMotion={reducedMotion}
-        slideshow={settings.slideshow}
-        intervalSeconds={settings.slideshowInterval}
-      />
+    <main className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <p className="label-hud anim-fade-up text-silver/70" style={{ animationDelay: "0.1s" }}>
+        Classified · Multiverse monitoring
+      </p>
+      <h1
+        className="anim-fade-up mt-5 text-3xl font-black tracking-[0.16em] text-glow sm:text-5xl md:text-6xl"
+        style={{ animationDelay: "0.5s" }}
+      >
+        DOOMSDAY WATCH
+      </h1>
+      <div className="hud-rule anim-fade-up mt-6 w-40 sm:w-72" style={{ animationDelay: "0.8s" }} />
+      <p
+        className="label-hud anim-fade-up mt-6 text-foreground/80"
+        style={{ animationDelay: "1s" }}
+      >
+        The timeline ends {RELEASE_LABEL}
+      </p>
+      <p
+        className="anim-fade-up mt-3 max-w-md font-mono text-[0.7rem] leading-relaxed text-muted-foreground"
+        style={{ animationDelay: "1.2s" }}
+      >
+        Incursion activity rising. This terminal tracks the viewing dossier required before
+        contact.
+      </p>
 
+      <button
+        type="button"
+        onClick={enter}
+        autoFocus
+        disabled={entering}
+        className="anim-fade-up mt-12 border border-primary/70 px-10 py-3 font-mono text-sm tracking-[0.35em] text-foreground transition-all hover:bg-primary/15 hover:shadow-[var(--glow-red)] disabled:opacity-60"
+        style={{ animationDelay: "1.5s" }}
+      >
+        {entering ? "[ ACCESSING ]" : "[ ENTER ]"}
+      </button>
 
+      <p className="label-hud mt-10 text-[0.55rem] text-muted-foreground/60">
+        Fan-made. Not affiliated with Marvel Studios or Disney.
+      </p>
 
-      {introVisible && <IntroScreen onEnter={enter} />}
-
-      <div className={introVisible ? "pointer-events-none opacity-0" : "opacity-100"}>
-        <Navbar />
-        <main>
-          <Hero />
-          <Countdown />
-          <StatsPanel completed={completedCount} total={total} percent={percent} />
-          <Watchlist
-            progress={progress}
-            toggle={toggle}
-            reset={reset}
-            completed={completedCount}
-            total={total}
-            percent={percent}
-            effects={settings.effects}
-          />
-          <StatusPanel completed={completedCount} total={total} />
-          <SettingsPanel
-            settings={settings}
-            update={update}
-            progress={progress}
-            setProgress={persist}
-            reset={reset}
-            activated={activated}
-            onReplayIntro={replayIntro}
-          />
-
-
-        </main>
-        <Footer />
-      </div>
-    </>
+      {entering && (
+        <div className="pointer-events-none fixed inset-0 z-50" aria-hidden="true">
+          <div className="anim-terminal-flicker absolute inset-0 bg-[oklch(0.03_0_0)]" />
+          <div className="scanlines absolute inset-0 opacity-60" />
+          <div className="anim-hud-sweep-down absolute inset-x-0 top-0 h-24 bg-[linear-gradient(180deg,transparent,oklch(0.52_0.21_25/0.35),transparent)]" />
+          <p className="absolute inset-x-0 top-1/2 text-center font-mono text-[0.6rem] tracking-[0.4em] text-primary">
+            ESTABLISHING LINK…
+          </p>
+        </div>
+      )}
+    </main>
   );
 }

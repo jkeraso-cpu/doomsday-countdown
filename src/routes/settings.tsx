@@ -1,20 +1,31 @@
 import { useRef } from "react";
-import { SLIDESHOW_INTERVALS, STORAGE, type BackgroundMode, type Settings } from "@/config";
-import type { Progress } from "@/lib/doomsday-store";
+import { createFileRoute } from "@tanstack/react-router";
+import { Footer } from "@/components/Footer";
+import { useDoomsday } from "@/lib/app-state";
 import { media } from "@/data/media";
-import { MusicPlayer } from "./MusicPlayer";
+import { SLIDESHOW_INTERVALS, STORAGE, type BackgroundMode } from "@/config";
+import type { StatusMap } from "@/lib/watch-status";
 
-interface Props {
-  settings: Settings;
-  update: (patch: Partial<Settings>) => void;
-  progress: Progress;
-  setProgress: (p: Progress) => void;
-  reset: () => void;
-  activated: boolean;
-  onReplayIntro: () => void;
-}
-
-
+export const Route = createFileRoute("/settings")({
+  head: () => ({
+    meta: [
+      { title: "Settings — Doomsday Watch Terminal" },
+      {
+        name: "description",
+        content:
+          "Control the background slideshow, ambience, cinematic effects and your saved Doomsday watch data.",
+      },
+      { property: "og:title", content: "Doomsday Watch Settings" },
+      {
+        property: "og:description",
+        content: "Background slideshow, ambience and data controls for the Doomsday watch terminal.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: SettingsPage,
+});
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -55,54 +66,50 @@ function Toggle({
   );
 }
 
-export function SettingsPanel({
-  settings,
-  update,
-  progress,
-  setProgress,
-  reset,
-  activated,
-  onReplayIntro,
-}: Props) {
+function SettingsPage() {
+  const { settings, update, watch } = useDoomsday();
   const fileRef = useRef<HTMLInputElement>(null);
 
-
-
-  const exportProgress = () => {
-    const blob = new Blob([JSON.stringify(progress, null, 2)], { type: "application/json" });
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(watch.statuses, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "doomsday-progress.json";
+    a.download = "doomsday-watch-status.json";
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const importProgress = async (file?: File) => {
+  const importData = async (file?: File) => {
     if (!file) return;
     try {
       const parsed = JSON.parse(await file.text());
-      if (parsed && typeof parsed === "object") setProgress(parsed as Progress);
-      else window.alert("That file doesn't contain valid progress data.");
+      if (parsed && typeof parsed === "object") watch.persist(parsed as StatusMap);
+      else window.alert("That file doesn't contain valid watch data.");
     } catch {
       window.alert("Could not read that file.");
     }
   };
 
   const onReset = () => {
-    if (window.confirm("Reset your entire Doomsday preparation progress?")) reset();
+    if (window.confirm("Reset every watch status back to NOT STARTED?")) watch.reset();
   };
 
   return (
-    <section id="settings" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-16 sm:px-6">
-      <div className="flex items-center gap-4">
-        <h2 className="text-lg font-bold tracking-[0.2em] sm:text-xl">SETTINGS</h2>
-        <div className="hud-rule flex-1" />
-      </div>
+    <>
+      <main className="mx-auto max-w-4xl px-4 pb-16 pt-24 sm:px-6">
+        <section className="pt-6">
+          <p className="label-hud text-silver/70">Terminal configuration</p>
+          <h1 className="mt-3 text-2xl font-black tracking-[0.14em] text-glow sm:text-4xl">
+            SETTINGS
+          </h1>
+        </section>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <div className="panel corner-brackets relative p-5 sm:p-6">
-          <Row label="Background">
+        <div className="panel corner-brackets relative mt-8 p-5 sm:p-6">
+          <p className="label-hud pb-2 text-primary">Background slideshow</p>
+          <Row label="Source">
             <Toggle
               value={settings.background}
               onChange={(v) => update({ background: v as BackgroundMode })}
@@ -113,7 +120,7 @@ export function SettingsPanel({
               ]}
             />
           </Row>
-          <Row label="Background slideshow">
+          <Row label="Slideshow">
             <Toggle
               value={settings.slideshow ? "on" : "off"}
               onChange={(v) => update({ slideshow: v === "on" })}
@@ -130,18 +137,22 @@ export function SettingsPanel({
               options={SLIDESHOW_INTERVALS.map((s) => ({ label: `${s}S`, value: String(s) }))}
             />
           </Row>
-          <Row label="Slideshow images">
+          <Row label="Built-in collection">
             <span className="label-hud text-[0.55rem] text-muted-foreground/60">
-              {media.length} BUILT-IN FRAMES
+              {media.length} FRAMES SHIPPED WITH THE APP
             </span>
           </Row>
-          <Row label="Music">
+        </div>
+
+        <div className="panel corner-brackets relative mt-4 p-5 sm:p-6">
+          <p className="label-hud pb-2 text-primary">Ambience</p>
+          <Row label="Background soundtrack">
             <Toggle
-              value={settings.musicEnabled ? "on" : "off"}
-              onChange={(v) => update({ musicEnabled: v === "on" })}
+              value={settings.musicEnabled && !settings.muted ? "on" : "off"}
+              onChange={(v) => update({ musicEnabled: v === "on", muted: false })}
               options={[
-                { label: "ENABLE", value: "on" },
-                { label: "DISABLE", value: "off" },
+                { label: "ON", value: "on" },
+                { label: "OFF", value: "off" },
               ]}
             />
           </Row>
@@ -152,14 +163,13 @@ export function SettingsPanel({
               max={100}
               value={Math.round(settings.volume * 100)}
               onChange={(e) => update({ volume: Number(e.target.value) / 100, muted: false })}
-              aria-label="Soundtrack volume"
+              aria-label="Ambience volume"
               className="h-1 w-40 cursor-pointer appearance-none bg-border accent-[oklch(0.52_0.21_25)]"
             />
             <span className="label-hud text-[0.55rem] text-muted-foreground/60">
-              {settings.muted ? "MUTED" : `${Math.round(settings.volume * 100)}%`}
+              {Math.round(settings.volume * 100)}%
             </span>
           </Row>
-
           <Row label="Cinematic effects">
             <Toggle
               value={settings.effects ? "on" : "off"}
@@ -170,27 +180,14 @@ export function SettingsPanel({
               ]}
             />
           </Row>
-          <Row label="Intro on startup">
-            <Toggle
-              value={settings.showIntro ? "on" : "off"}
-              onChange={(v) => update({ showIntro: v === "on" })}
-              options={[
-                { label: "ON", value: "on" },
-                { label: "OFF", value: "off" },
-              ]}
-            />
+        </div>
+
+        <div className="panel corner-brackets relative mt-4 p-5 sm:p-6">
+          <p className="label-hud pb-2 text-primary">Watch data</p>
+          <Row label="Saved statuses">
             <button
               type="button"
-              onClick={onReplayIntro}
-              className="border border-border px-3 py-1.5 font-mono text-[0.6rem] tracking-[0.18em] text-muted-foreground transition-colors hover:border-primary/60 hover:text-foreground"
-            >
-              REPLAY
-            </button>
-          </Row>
-          <Row label="Data">
-            <button
-              type="button"
-              onClick={exportProgress}
+              onClick={exportData}
               className="border border-border px-3 py-1.5 font-mono text-[0.6rem] tracking-[0.18em] transition-colors hover:border-primary/60"
             >
               EXPORT
@@ -207,7 +204,7 @@ export function SettingsPanel({
               type="file"
               accept="application/json"
               className="hidden"
-              onChange={(e) => importProgress(e.target.files?.[0])}
+              onChange={(e) => importData(e.target.files?.[0])}
             />
             <button
               type="button"
@@ -221,9 +218,8 @@ export function SettingsPanel({
             Stored locally in this browser ({STORAGE.settings})
           </p>
         </div>
-
-        <MusicPlayer settings={settings} update={update} activated={activated} />
-      </div>
-    </section>
+      </main>
+      <Footer />
+    </>
   );
 }
