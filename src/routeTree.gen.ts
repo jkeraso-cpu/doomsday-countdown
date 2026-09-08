@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as WatchRouteImport } from './routes/watch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WatchRoute = WatchRouteImport.update({
@@ -25,27 +31,31 @@ const WatchRoute = WatchRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/progress': typeof ProgressRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/progress': typeof ProgressRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/progress': typeof ProgressRoute
   '/watch': typeof WatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/watch'
+  fullPaths: '/' | '/progress' | '/watch'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/watch'
-  id: '__root__' | '/' | '/watch'
+  to: '/' | '/progress' | '/watch'
+  id: '__root__' | '/' | '/progress' | '/watch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ProgressRoute: typeof ProgressRoute
   WatchRoute: typeof WatchRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/watch': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ProgressRoute: ProgressRoute,
   WatchRoute: WatchRoute,
 }
 export const routeTree = rootRouteImport
